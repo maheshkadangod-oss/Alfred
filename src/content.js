@@ -31,8 +31,6 @@ export const hero = {
   word: 'ALFIEMAX',
   roleA: 'Solutions Architect',
   roleB: '& full-stack engineer',
-  // loader words, shown one after another before the big word lands
-  intro: ['Alfred', 'Dominic'],
   // the line that appears after the burst. It is Alfred's own banner line.
   after: ['Complex systems.', 'Kept simple.'],
   afterSub: 'That was ten thousand moving parts. My job is making them feel like one.',

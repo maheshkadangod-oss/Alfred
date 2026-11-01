@@ -12,9 +12,9 @@ export function navHtml() {
     <canvas class="orb" aria-hidden="true"></canvas>
     <div class="grain" aria-hidden="true"></div>
     <div class="cursor" aria-hidden="true"><i class="c-dot"></i><i class="c-ring"><span></span></i></div>
-    <div class="loader" aria-hidden="true"><i class="l-dot"></i><span class="l-word chrome"></span></div>
+    <div class="loader" aria-hidden="true"><span class="l-sign sig">${site.name}</span><i class="l-dot"></i></div>
     <header class="nav">
-      <a href="#top" class="logo" aria-label="${site.name}, back to top">${site.name}</a>
+      <a href="#top" class="logo sig" aria-label="${site.name}, back to top">${site.name}</a>
       <nav aria-label="Main" class="nav-links">
         ${sections.map(([id, label]) => `<a href="#${id}">${label}</a>`).join('')}
       </nav>
@@ -60,6 +60,7 @@ function heroHtml() {
           <p class="after-sub">${hero.afterSub}</p>
         </div>
         <div class="hero-foot">
+          <p class="sig hero-sig" aria-hidden="true">${site.name}</p>
           <h1 class="word chrome" aria-label="${site.fullName}, ${hero.word}">${chars(hero.word)}</h1>
           <div class="hero-meta">
             <p class="role"><b>${hero.roleA}</b> <i>${hero.roleB}</i></p>
@@ -132,6 +133,7 @@ export function renderHome() {
         <h2 class="big">${contact.title.map((l) => `<span class="bl"><span>${l}</span></span>`).join('')}</h2>
         <p class="contact-sub reveal">${contact.sub}</p>
         <a class="mail magnetic" href="mailto:${site.email}">${site.email}<span aria-hidden="true">↗</span></a>
+        <p class="sig contact-sig" aria-hidden="true">${site.name}</p>
       </div>
     </section>`
 }

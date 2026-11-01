@@ -59,7 +59,7 @@ lenis.on('scroll', (e) => {
 const word = $('.word')
 const wordChars = splitChars(word, hero.word)
 // slow shine across the letters
-if (!reduced) gsap.fromTo([word, '.l-word'], { '--shine': '160%' }, { '--shine': '-60%', duration: 2.6, ease: 'power2.inOut', repeat: -1, repeatDelay: 2.4 })
+if (!reduced) gsap.fromTo(word, { '--shine': '160%' }, { '--shine': '-60%', duration: 2.6, ease: 'power2.inOut', repeat: -1, repeatDelay: 2.4 })
 
 if (reduced) {
   document.body.classList.add('still', 'no-orb')
@@ -73,23 +73,27 @@ function intro() {
   lenis.stop()
   const loader = $('.loader')
   const dot = $('.l-dot')
-  const lw = $('.l-word')
-  gsap.set(['.nav', '.hero-a', '.hero-meta'], { autoAlpha: 0 })
+  const sign = $('.l-sign')
+  gsap.set(['.nav', '.hero-a', '.hero-meta', '.hero-sig'], { autoAlpha: 0 })
   gsap.set(wordChars, { autoAlpha: 0 })
 
   const tl = gsap.timeline({ delay: 0.2 })
   tl.fromTo(dot, { scale: 0 }, { scale: 1, duration: 0.5, ease: 'back.out(3)' })
     .to(dot, { scale: 1.6, duration: 0.25, yoyo: true, repeat: 1, ease: 'sine.inOut' })
   // the dust starts gathering into the bomb behind the loader
-  tl.to(P, { intro: 1, duration: 2.2, ease: 'power2.inOut' }, 0.3)
+  tl.to(P, { intro: 1, duration: 2.4, ease: 'power2.inOut' }, 0.3)
 
-  // each intro word: letters flip up out of the dot, then fly off
-  hero.intro.forEach((txt, k) => {
-    tl.call(() => { lw.style.lineHeight = 1; splitChars(lw, txt.toUpperCase()) })
-    if (k === 0) tl.to(dot, { scale: 0, duration: 0.3, ease: 'power3.in' }, '<')
-    tl.fromTo(() => $$('.ch', lw), { yPercent: 120, rotateX: -90, autoAlpha: 0, filter: 'blur(8px)' }, { yPercent: 0, rotateX: 0, autoAlpha: 1, filter: 'blur(0px)', duration: 0.7, ease: 'expo.out', stagger: 0.04 })
-      .to(() => $$('.ch', lw), { yPercent: -120, rotateX: 90, autoAlpha: 0, filter: 'blur(8px)', duration: 0.45, ease: 'power3.in', stagger: 0.025 }, '+=0.35')
+  // the dot becomes the pen: it runs left to right and his signature appears behind it
+  tl.call(() => {
+    const r = sign.getBoundingClientRect()
+    gsap.set(dot, { x: r.left - window.innerWidth / 2, y: r.top + r.height * 0.62 - window.innerHeight / 2, scale: 0.6 })
   })
+  tl.set(sign, { autoAlpha: 1 })
+  tl.fromTo(sign, { clipPath: 'inset(-20% 100% -20% 0)' }, { clipPath: 'inset(-20% 0% -20% 0)', duration: 1.6, ease: 'power1.inOut' })
+  tl.to(dot, { x: () => { const r = sign.getBoundingClientRect(); return r.right - window.innerWidth / 2 }, duration: 1.6, ease: 'power1.inOut' }, '<')
+  tl.to(dot, { y: '+=10', duration: 0.2, yoyo: true, repeat: 7, ease: 'sine.inOut' }, '<')
+  tl.to(dot, { scale: 0, duration: 0.3 })
+  tl.to(sign, { autoAlpha: 0, y: -20, filter: 'blur(8px)', duration: 0.6, ease: 'power2.in' }, '+=0.3')
 
   // the spotlight opens, the bomb heats up and blows, the pieces land as the portrait
   tl.call(() => loader.classList.add('done'))
@@ -100,6 +104,7 @@ function intro() {
   // the big word rises letter by letter, like it is standing up
   tl.fromTo(wordChars, { yPercent: 105, rotateX: -85, autoAlpha: 0 }, { yPercent: 0, rotateX: 0, autoAlpha: 1, duration: 1.3, ease: 'expo.out', stagger: 0.05 }, '<0.2')
   tl.fromTo(['.nav', '.hero-a', '.hero-meta'], { autoAlpha: 0, y: 20 }, { autoAlpha: 1, y: 0, duration: 1, ease: 'power3.out', stagger: 0.1 }, '<0.5')
+  tl.fromTo('.hero-sig', { autoAlpha: 1, clipPath: 'inset(-30% 100% -30% 0)' }, { clipPath: 'inset(-30% 0% -30% 0)', duration: 1.4, ease: 'power1.inOut' }, '<0.3')
   tl.call(() => {
     loader.remove()
     document.body.classList.remove('loading')
@@ -126,7 +131,7 @@ function heroScroll() {
     const side = (i - (wordChars.length - 1) / 2) / wordChars.length
     tl.to(c, { yPercent: -60 - Math.random() * 120, xPercent: side * 160, rotate: side * 70 + (Math.random() - 0.5) * 40, autoAlpha: 0, filter: 'blur(10px)', duration: 0.35, ease: 'power2.out' }, 0.2 + Math.random() * 0.04)
   })
-  tl.to('.hero-meta', { autoAlpha: 0, duration: 0.1 }, 0.18)
+  tl.to(['.hero-meta', '.hero-sig'], { autoAlpha: 0, duration: 0.1 }, 0.18)
   tl.fromTo('.flash', { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.025 }, 0.195)
   tl.to('.flash', { autoAlpha: 0, duration: 0.12, ease: 'power2.out' }, 0.22)
   tl.fromTo('.shock', { scale: 0.3, autoAlpha: 0 }, { scale: 5, autoAlpha: 0.9, duration: 0.05 }, 0.2)
@@ -276,6 +281,7 @@ if (!reduced) {
   // ---------- contact ----------
   gsap.from('.bl > span', { yPercent: 110, duration: 1.3, ease: 'expo.out', stagger: 0.1, scrollTrigger: { trigger: '.big', start: 'top 85%' } })
   gsap.from('.mail', { autoAlpha: 0, y: 30, duration: 1, scrollTrigger: { trigger: '.mail', start: 'top 92%' } })
+  gsap.fromTo('.contact-sig', { clipPath: 'inset(-30% 100% -30% 0)' }, { clipPath: 'inset(-30% 0% -30% 0)', duration: 1.6, ease: 'power1.inOut', scrollTrigger: { trigger: '.contact-sig', start: 'top 95%' } })
 } else {
   $$('.job').forEach((j) => j.classList.add('on'))
 }
