@@ -1,77 +1,56 @@
-# Hero video for alfiemax.com
+# Video prompts for alfiemax.com
 
-The hero works like this: a ball of 10,000 light particles sits next to Alfred's name. Scroll, it tightens,
-flashes and bursts. When the dust clears, Alfred is standing there in a portrait card with the line
-"Complex systems. Kept simple."
+The hero no longer needs a video of Alfred. His portrait is drawn live in 10,000 dots, so it can
+burst and rebuild. Video is still worth making for two jobs: the dot portrait's source photo, and
+the launch reel for Instagram and LinkedIn (the kind of clip you sent me as references).
 
-That portrait card plays `public/video/hero.mp4` if the file exists. Until then it shows the still photo.
-So the video has one job: **look like the person who was inside the bomb.**
+Settings for all: Veo 3 in Google AI Studio (or Kling / Runway), 9:16, 8 seconds, no sound.
+Negative prompt for all: text, captions, logos, watermark, extra fingers, warped hands, face morphing,
+changing identity, flicker, cartoon, plastic skin, oversharpened, people in background
 
-## What I need from you first
+## 1. A better source for the dot portrait (do this first)
 
-1. A sharper photo of Alfred. The night laptop photo you sent is 591 x 1280 and has an
-   "AI-generated content" tag in the corner (I cropped it out). Ask him for the original from his phone.
-2. Alfred's OK to make an AI video of his face. Ask him, don't assume.
-3. One photo against a plain dark wall, if he can take one. That unlocks prompt C.
+The dots copy whatever photo they're fed. The night photo cuts his face at the frame edge, so the dots
+draw half a face. The best fix is a real photo, not AI: Alfred, shoulders up, facing the camera, plain
+dark wall, one soft light from the side. A phone in portrait mode is enough. Send it and I swap it in.
 
-## Settings for every prompt
-
-The site is grey with one red accent, so every clip should come out close to black and white.
-The page also greys the video down, so a little colour is fine.
-
-
-- Tool: Veo 3 in Google AI Studio (or Kling 2.x / Runway Gen-4). Use **image to video** with the photo as the first frame.
-- Aspect ratio 9:16. Length 6 to 8 seconds. Sound off.
-- Paste the negative prompt below into the negative field if the tool has one.
-
-**Negative prompt:** text, captions, logos, watermark, subtitles, extra fingers, warped hands, face morphing, changing identity, flicker, fast camera moves, zoom blur, cartoon, plastic skin, oversharpened, lens flare, people in background
-
-## Prompt A: the night desk (use this first)
-
-Start frame: the night laptop photo.
+If he wants to try AI first, use the LinkedIn photo as the start frame:
 
 ```
-Cinematic portrait video. A South Indian software engineer in a plain black t-shirt sits at a laptop
-by a tall glass window at night, city lights soft and out of focus behind him. He types for a moment,
-then looks up into the lens with a calm, confident half smile and holds eye contact. Keyboard backlight
-glows softly on his hands. The camera is locked off with a very slow push in, almost still. Muted, almost black and white
-colour grade, soft grey tones, a small warm light on his face. Shallow depth of field, 50mm lens,
-natural skin texture, quiet and premium mood. Same person, same clothes, same face for the whole clip.
-The last frame should match the first frame closely so the clip can loop.
+Studio headshot video. A South Indian software engineer in a plain grey t-shirt faces the camera,
+shoulders square, on a pure dark charcoal background. One soft key light from the left, gentle rim
+light on his hair. He holds still, then gives a slow, calm half smile. Camera locked off. Sharp focus
+on the eyes, natural skin texture, muted almost black and white colour grade. Same face for the whole clip.
 ```
 
-## Prompt B: assembled from light (matches the burst best)
+Pause on the sharpest frame and screenshot it. That still is what goes into the dot portrait.
 
-Start frame: same photo. If your tool has "end frame", put the photo there instead and leave the start empty.
+## 2. Launch reel: the site on a screen (the style of your reference clips)
 
-```
-Thousands of tiny silver and white light particles drift in from the darkness and gather into the
-shape of a man sitting at a laptop by a night window. The particles settle and become a real, sharp,
-photographic person: a South Indian engineer in a black t-shirt, who then looks up at the camera with a
-calm half smile. Deep black background at the start, the window and city lights fade in softly behind
-him as he forms. Slow, elegant motion, no camera shake. Premium, minimal, cinematic. Same face the whole time.
-```
-
-If the face comes out wrong in B, stop. Use A. A wrong face on someone's own portfolio is worse than no video.
-
-## Prompt C: studio cut-out (needs the plain-wall photo)
+Record the real site with a screen recorder first. Then use AI only for the setting shot:
 
 ```
-Studio portrait video on a pure graphite grey background (#141414). A South Indian software engineer
-in a black t-shirt stands with arms crossed, lit by one soft key light from the left and a thin neutral
-white rim light from behind. He uncrosses his arms, turns his head slowly to the camera and gives a small
-nod. Camera fixed at chest height, 85mm lens, very slow push in. No props, no text. Desaturated grey colour grade. Calm and confident.
+Slow cinematic push in on a matte black monitor on a dark walnut desk at night. A small green plant
+and a warm desk lamp at the edge of frame, deep green and charcoal tones, soft haze. The screen glows
+softly. Camera glides forward smoothly at a slight angle, 35mm lens, shallow depth of field, premium
+studio mood, nothing moving except the camera.
 ```
 
-C is the one that looks like the "SATHYADEV" reference you sent, where the person stands in front of the name.
+Then put your screen recording onto the monitor in CapCut (corner pin, or "screen replace").
+Caption idea: "11 years of systems, kept simple. alfiemax.com"
 
-## After you get the video
+## 3. Hook clip for the first second of the reel
 
-Paste this into Claude Code from the project folder. It shrinks the file so the page stays fast:
+```
+Macro shot in total darkness. A single point of white light hangs in the middle of the frame, pulses
+once, then bursts into thousands of tiny silver particles that drift outward slowly like dust in a
+spotlight. Faint green tint at the edges. Smooth slow motion, very premium, no camera shake.
+```
+
+This matches the site's own load animation, so the reel and the site feel like one thing.
+
+## Shrink any clip before it goes on the web
 
 ```bash
-ffmpeg -i your-video.mp4 -vf "scale=720:-2,fps=30" -c:v libx264 -crf 26 -preset slow -an -movflags +faststart public/video/hero.mp4
+ffmpeg -i in.mp4 -vf "scale=720:-2,fps=30" -c:v libx264 -crf 26 -preset slow -an -movflags +faststart out.mp4
 ```
-
-Aim for under 4 MB. Then also save one still from the clip as `public/img/alfred-night.webp`
-so the poster frame matches the video's first frame.

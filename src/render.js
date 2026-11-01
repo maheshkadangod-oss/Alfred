@@ -1,80 +1,123 @@
 // Builds the page HTML as plain strings at build time (see vite.config.js).
+// Crawlers get every word without running JavaScript.
 import { site, hero, stats, about, projects, experience, skills, contact } from './content.js'
 
 const ext = 'target="_blank" rel="noopener"'
 const sections = [['about', 'About'], ['work', 'Work'], ['experience', 'Experience'], ['contact', 'Contact']]
 const words = (t) => t.split(' ').map((w) => `<span class="w"><span>${w}</span></span>`).join(' ')
+const chars = (t) => [...t].map((c) => `<span class="ch">${c}</span>`).join('')
 
 export function navHtml() {
-  return `<header class="nav">
-      <a href="#top" class="logo" aria-label="${site.name}, back to top"><b>AD</b><span>${site.handle}</span></a>
+  return `<div class="backdrop" aria-hidden="true"></div>
+    <canvas class="orb" aria-hidden="true"></canvas>
+    <div class="grain" aria-hidden="true"></div>
+    <div class="cursor" aria-hidden="true"><i class="c-dot"></i><i class="c-ring"><span></span></i></div>
+    <div class="loader" aria-hidden="true"><i class="l-dot"></i><span class="l-word chrome"></span></div>
+    <header class="nav">
+      <a href="#top" class="logo" aria-label="${site.name}, back to top">${site.name}</a>
       <nav aria-label="Main" class="nav-links">
         ${sections.map(([id, label]) => `<a href="#${id}">${label}</a>`).join('')}
       </nav>
-      <a href="mailto:${site.email}" class="nav-cta">Let's talk</a>
+      <a href="mailto:${site.email}" class="nav-cta magnetic">Let's talk</a>
     </header>`
+}
+
+// A small architecture diagram for each project, drawn from its stack:
+// Users -> the core framework -> everything it talks to. Dots travel the wires.
+function diagram(p, n) {
+  const pill = (label, cx, cy, cls = '') => {
+    const w = Math.max(56, label.length * 7 + 26)
+    return { label, cx, cy, w, l: cx - w / 2, r: cx + w / 2, svg: `<g class="node ${cls}"><rect x="${cx - w / 2}" y="${cy - 14}" width="${w}" height="28" rx="14"/><text x="${cx}" y="${cy + 4}">${label}</text></g>` }
+  }
+  const [core, ...rest] = p.stack
+  const users = pill('Users', 44, 120, 'ghost')
+  const hub = pill(core, 168, 120, 'hub')
+  const outs = rest.map((s, j) => pill(s, 330, 120 + (j - (rest.length - 1) / 2) * 46))
+  const wire = (a, b, id) => `<path id="${id}" class="wire" d="M${a.r} ${a.cy} C ${(a.r + b.l) / 2} ${a.cy}, ${(a.r + b.l) / 2} ${b.cy}, ${b.l} ${b.cy}"/>`
+  const wires = [wire(users, hub, `w${n}-0`), ...outs.map((o, j) => wire(hub, o, `w${n}-${j + 1}`))]
+  const dots = wires.map((_, j) => `<circle r="2.6" class="pulse"><animateMotion dur="${2.4 + (j % 3) * 0.5}s" begin="${j * 0.35}s" repeatCount="indefinite"><mpath href="#w${n}-${j}"/></animateMotion></circle>`)
+  return `<svg class="diagram" viewBox="0 0 400 240" role="img" aria-label="${p.name} architecture: ${p.stack.join(', ')}">
+          ${wires.join('')}${dots.join('')}${users.svg}${hub.svg}${outs.map((o) => o.svg).join('')}
+        </svg>`
 }
 
 function heroHtml() {
   return `<section class="hero" id="top" aria-label="Introduction">
       <div class="hero-stage">
-        <canvas class="orb" aria-hidden="true"></canvas>
-        <div class="shock" aria-hidden="true"></div>
         <div class="flash" aria-hidden="true"></div>
-        <figure class="portrait" aria-hidden="true">
-          <video class="portrait-video" muted loop playsinline preload="none" poster="/img/alfred-night.webp" data-src="/video/hero.mp4"></video>
-        </figure>
+        <div class="shock" aria-hidden="true"></div>
+        <img class="cutout" src="/img/alfred-cutout.webp" alt="" aria-hidden="true" width="591" height="820" />
         <div class="hero-a">
-          <p class="eyebrow"><i></i>${hero.eyebrow}</p>
-          <h1 class="name"><span class="name-line">${hero.first}</span><span class="name-line">${hero.last}</span></h1>
+          <p class="eyebrow">${hero.eyebrow}</p>
           <p class="hero-sub">${hero.sub}</p>
           <div class="hero-ctas">
-            <a href="#work" class="btn btn-solid">${hero.primary}<span aria-hidden="true">→</span></a>
-            <a href="#contact" class="btn">${hero.secondary}</a>
+            <a href="#work" class="btn btn-solid magnetic">${hero.primary}<span aria-hidden="true">→</span></a>
+            <a href="#contact" class="btn magnetic">${hero.secondary}</a>
           </div>
         </div>
         <div class="hero-b" aria-hidden="true">
           <p class="after">${hero.after.map((l) => `<span>${l}</span>`).join('')}</p>
           <p class="after-sub">${hero.afterSub}</p>
         </div>
-        <p class="hint" aria-hidden="true"><span></span>${hero.hint}</p>
+        <div class="hero-foot">
+          <h1 class="word chrome" aria-label="${site.fullName}, ${hero.word}">${chars(hero.word)}</h1>
+          <div class="hero-meta">
+            <p class="role"><b>${hero.roleA}</b> <i>${hero.roleB}</i></p>
+            <p class="where">${site.city}</p>
+          </div>
+        </div>
       </div>
     </section>`
 }
 
 export function renderHome() {
+  const marquee = skills.flatMap((g) => g.items)
+  const half = Math.ceil(marquee.length / 2)
+  const row = (items) => `<div class="mq-row"><div class="mq-track">${[...items, ...items].map((s) => `<span>${s}</span><i>✦</i>`).join('')}</div></div>`
   return `${heroHtml()}
     <section class="stats" aria-label="In numbers">
-      ${stats.map((s) => `<div class="stat reveal"><strong>${s.value}</strong><span>${s.label}</span></div>`).join('')}
+      ${stats.map((s) => `<div class="stat reveal"><strong data-count="${s.value}">${s.value}</strong><span>${s.label}</span></div>`).join('')}
     </section>
 
     <section class="block about" id="about">
-      <p class="label">01 · About</p>
+      <p class="label">About</p>
       <h2 class="split">${words(about.title)}</h2>
       <div class="about-body">${about.body.map((p) => `<p class="reveal">${p}</p>`).join('')}</div>
     </section>
 
-    <section class="block work" id="work">
-      <p class="label">02 · Work</p>
-      <h2 class="split">${words("Things I've built.")}</h2>
-      <div class="projects">
-        ${projects.map((p, i) => `<article class="project reveal${p.featured ? ' featured' : ''}">
-          <span class="p-num">${String(i + 1).padStart(2, '0')}</span>
-          <p class="p-tag">${p.tag}</p>
-          <h3>${p.name}</h3>
-          <p class="p-text">${p.text}</p>
-          <ul class="chips">${p.stack.map((s) => `<li>${s}</li>`).join('')}</ul>
-        </article>`).join('')}
+    <section class="work" id="work">
+      <div class="work-pin">
+        <div class="work-head">
+          <div><p class="label">Work</p><h2 class="split">${words("Things I've built.")}</h2></div>
+          <div class="work-count" aria-hidden="true"><b class="wc-now">01</b><span>/ ${String(projects.length).padStart(2, '0')}</span><i class="wc-bar"><i></i></i></div>
+        </div>
+        <div class="work-track">
+          ${projects.map((p, i) => `<article class="project${p.featured ? ' featured' : ''}">
+            <div class="p-inner">
+              <div class="p-top"><span class="p-num">${String(i + 1).padStart(2, '0')}</span><span class="p-tag">${p.tag}</span></div>
+              ${diagram(p, i)}
+              <h3>${p.name}</h3>
+              <p class="p-text">${p.text}</p>
+              <ul class="chips">${p.stack.map((s) => `<li>${s}</li>`).join('')}</ul>
+            </div>
+          </article>`).join('')}
+        </div>
       </div>
     </section>
 
+    <section class="marquee" aria-label="Tools I use">
+      ${row(marquee.slice(0, half))}
+      ${row(marquee.slice(half)).replace('mq-row', 'mq-row rev')}
+    </section>
+
     <section class="block experience" id="experience">
-      <p class="label">03 · Experience</p>
+      <p class="label">Experience</p>
       <h2 class="split">${words("Where I've worked.")}</h2>
       <ol class="timeline">
-        ${experience.map((e) => `<li class="job reveal">
+        <i class="tl-fill" aria-hidden="true"></i>
+        ${experience.map((e) => `<li class="job">
           <span class="when">${e.when}</span>
-          <div><h3>${e.company}</h3><p class="role">${e.role}</p></div>
+          <div><h3>${e.company}</h3><p class="role-t">${e.role}</p></div>
           <p>${e.text}</p>
         </li>`).join('')}
       </ol>
@@ -83,11 +126,13 @@ export function renderHome() {
       </div>
     </section>
 
-    <section class="block contact" id="contact">
-      <p class="label">04 · Contact</p>
-      <h2 class="big">${contact.title.map((l) => `<span>${l}</span>`).join('')}</h2>
-      <p class="contact-sub reveal">${contact.sub}</p>
-      <a class="mail reveal" href="mailto:${site.email}">${site.email}<span aria-hidden="true">↗</span></a>
+    <section class="contact" id="contact">
+      <div class="contact-in">
+        <p class="label">Contact</p>
+        <h2 class="big">${contact.title.map((l) => `<span class="bl"><span>${l}</span></span>`).join('')}</h2>
+        <p class="contact-sub reveal">${contact.sub}</p>
+        <a class="mail magnetic" href="mailto:${site.email}">${site.email}<span aria-hidden="true">↗</span></a>
+      </div>
     </section>`
 }
 

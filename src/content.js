@@ -21,16 +21,21 @@ export const seo = {
 }
 
 export const hero = {
-  eyebrow: 'Solutions Architect · Kochi, Kerala',
+  eyebrow: 'Rails · React · React Native · AWS',
   first: 'Alfred',
   last: 'Dominic.',
   sub: '11+ years building SaaS products from the first commit to production. Backend architecture, product, and cloud, usually as the founding or only engineer.',
   primary: 'See the work',
   secondary: 'Get in touch',
-  hint: 'Scroll',
+  // the big chrome word at the bottom of the hero (his handle and domain)
+  word: 'ALFIEMAX',
+  roleA: 'Solutions Architect',
+  roleB: '& full-stack engineer',
+  // loader words, shown one after another before the big word lands
+  intro: ['Alfred', 'Dominic'],
   // the line that appears after the burst. It is Alfred's own banner line.
   after: ['Complex systems.', 'Kept simple.'],
-  afterSub: 'Everything you just watched fly apart was ten thousand moving parts. My job is making them feel like one.',
+  afterSub: 'That was ten thousand moving parts. My job is making them feel like one.',
 }
 
 // CONFIRM: live site animates these from zero. Products = projects listed below. Industries = fintech,
