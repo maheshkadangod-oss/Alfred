@@ -29,6 +29,7 @@ export const hero = {
   secondary: 'Get in touch',
   // the big chrome word at the bottom of the hero (his handle and domain)
   word: 'ALFIEMAX',
+  rail: 'Open to select projects · 2026', // CONFIRM Alfred is taking work
   roleA: 'Solutions Architect',
   roleB: '& full-stack engineer',
   // the line that appears after the burst. It is Alfred's own banner line.
@@ -91,3 +92,12 @@ export const contact = {
   title: ['Got a product', 'to build?'],
   sub: 'I take on a small number of freelance and consulting projects each year. Tell me what you are building and where it is stuck.',
 }
+
+// Questions people (and AI answer engines) ask. Shown on the page and marked up as FAQPage schema.
+export const faq = [
+  { q: 'Who is Alfred Dominic?', a: 'Alfred Dominic is a Solutions Architect and full-stack engineer based in Kochi, Kerala, India. He has spent 11+ years building SaaS products from the first commit to production across fintech, logistics, restaurant tech, CRM, marketing analytics, edtech and EV/IoT.' },
+  { q: 'What does Alfred Dominic build?', a: 'Vertical SaaS platforms and internal tools. Recent work includes GoZip, a platform for moving companies, the Sydecar operations platform for SPVs and funds, and his own restaurant suite: SmashPOS, Ledgr, PayLens and Pantry.' },
+  { q: 'What is his tech stack?', a: 'Ruby on Rails, Node.js, React, React Native, Next.js and TypeScript, with PostgreSQL, Redis, Elasticsearch and Convex for data, and AWS, Docker and Vercel for infrastructure. Integrations include Stripe, Twilio, Google Ads and BigQuery.' },
+  { q: 'Is Alfred available for freelance or consulting work?', a: 'Yes. He takes on a small number of freelance and consulting projects each year, usually as the founding or lead engineer. Email mailme@alfiemax.com with what you are building and where it is stuck.' }, // CONFIRM availability
+  { q: 'Where is Alfred Dominic based?', a: 'Kochi, Kerala, India. He works remotely with teams in the United States and elsewhere.' },
+]

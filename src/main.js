@@ -64,8 +64,17 @@ lenis.on('scroll', (e) => {
 // ---------- the big chrome word ----------
 const word = $('.word')
 const wordChars = splitChars(word, hero.word)
+// each letter gets an inner layer: the intro and the cursor move the inner one, the scroll burst moves the outer one,
+// so the two never fight over the same element
+wordChars.forEach((c) => { c.innerHTML = `<span class="ci">${c.innerHTML}</span>` })
+const wordInner = wordChars.map((c) => c.firstChild)
 // slow shine across the letters
-if (!reduced) gsap.fromTo(word, { '--shine': '160%' }, { '--shine': '-60%', duration: 2.6, ease: 'power2.inOut', repeat: -1, repeatDelay: 2.4 })
+if (!reduced) {
+  gsap.fromTo(word, { '--shine': '160%' }, { '--shine': '-60%', duration: 2.6, ease: 'power2.inOut', repeat: -1, repeatDelay: 2.4 })
+  // the pinstripes inside the letters drift down slowly; scrolling makes them run and widen
+  gsap.to(word, { '--stripe': '120px', duration: 6, ease: 'none', repeat: -1 })
+  lenis.on('scroll', (e) => gsap.to(word, { '--sw': `${4 + Math.min(Math.abs(e.velocity), 20) * 0.5}px`, duration: 0.4, overwrite: 'auto' }))
+}
 
 if (reduced) {
   document.body.classList.add('still', 'no-orb')
@@ -75,57 +84,33 @@ if (reduced) {
 
 // ---------- intro: a dot in a spotlight becomes the name, the bomb forms, blows, and lands as Alfred ----------
 function intro() {
-  document.body.classList.add('loading')
-  lenis.stop()
+  // The page is on screen and scrollable after 0.5 seconds. The particles keep building the
+  // portrait for about a second after that, while people are already reading.
   const loader = $('.loader')
   const dot = $('.l-dot')
-  const sign = $('.l-sign')
-  gsap.set(['.nav', '.hero-a', '.hero-meta', '.hero-sig'], { autoAlpha: 0 })
-  gsap.set(wordChars, { autoAlpha: 0 })
+  heroScroll()
+  gsap.set(wordInner, { autoAlpha: 0 })
+  gsap.set(['.nav', '.hero-a > *', '.hero-meta > *'], { autoAlpha: 0 })
+  gsap.set('.hero-sig', { autoAlpha: 1, clipPath: 'inset(-30% 100% -30% 0)' })
 
-  const tl = gsap.timeline({ delay: 0.2 })
-  tl.fromTo(dot, { scale: 0 }, { scale: 1, duration: 0.5, ease: 'back.out(3)' })
-    .to(dot, { scale: 1.6, duration: 0.25, yoyo: true, repeat: 1, ease: 'sine.inOut' })
-  // the dust starts gathering into the bomb behind the loader
-  tl.to(P, { intro: 1, duration: 2.4, ease: 'power2.inOut' }, 0.3)
-
-  // the dot becomes the pen: it runs left to right and his signature appears behind it
-  tl.call(() => {
-    const r = sign.getBoundingClientRect()
-    gsap.set(dot, { x: r.left - window.innerWidth / 2, y: r.top + r.height * 0.62 - window.innerHeight / 2, scale: 0.6 })
-  })
-  tl.set(sign, { autoAlpha: 1 })
-  tl.fromTo(sign, { clipPath: 'inset(-20% 100% -20% 0)' }, { clipPath: 'inset(-20% 0% -20% 0)', duration: 1.6, ease: 'power1.inOut' })
-  tl.to(dot, { x: () => { const r = sign.getBoundingClientRect(); return r.right - window.innerWidth / 2 }, duration: 1.6, ease: 'power1.inOut' }, '<')
-  tl.to(dot, { y: '+=10', duration: 0.2, yoyo: true, repeat: 7, ease: 'sine.inOut' }, '<')
-  tl.to(dot, { scale: 0, duration: 0.3 })
-  tl.to(sign, { autoAlpha: 0, y: -20, filter: 'blur(8px)', duration: 0.6, ease: 'power2.in' }, '+=0.3')
-
-  // the spotlight opens, the bomb heats up and blows, the pieces land as the portrait
-  tl.call(() => loader.classList.add('done'))
-  tl.to(P, { heat: 1, duration: 0.7, ease: 'power2.in' }, '<')
-  tl.fromTo('.flash', { autoAlpha: 0 }, { autoAlpha: 0.7, duration: 0.08 }, '>-0.05')
-  tl.to('.flash', { autoAlpha: 0, duration: 0.8, ease: 'power2.out' })
-  tl.to(P, { form: 1, duration: 1.8, ease: 'power2.out' }, '<-0.75')
-  // the big word rises letter by letter, like it is standing up
-  tl.fromTo(wordChars, { yPercent: 105, rotateX: -85, autoAlpha: 0 }, { yPercent: 0, rotateX: 0, autoAlpha: 1, duration: 1.3, ease: 'expo.out', stagger: 0.05 }, '<0.2')
-  tl.fromTo(['.nav', '.hero-a', '.hero-meta'], { autoAlpha: 0, y: 20 }, { autoAlpha: 1, y: 0, duration: 1, ease: 'power3.out', stagger: 0.1 }, '<0.5')
-  tl.fromTo('.hero-sig', { autoAlpha: 1, clipPath: 'inset(-30% 100% -30% 0)' }, { clipPath: 'inset(-30% 0% -30% 0)', duration: 1.4, ease: 'power1.inOut' }, '<0.3')
-  tl.call(() => decode($('.eyebrow'), { duration: 1.2 }), null, '<0.2')
-  tl.call(() => {
-    loader.remove()
-    document.body.classList.remove('loading')
-    lenis.start()
-    heroScroll()
-    wordHover()
-  })
-  // the whole intro is under 2 seconds on a first visit and about 1 second after that
-  let seen = false
-  try { seen = !!localStorage.getItem('ad-intro'); localStorage.setItem('ad-intro', '1') } catch {}
-  tl.timeScale(seen ? 8 : 4.5)
-  // scroll, swipe, click or any key fast-forwards it
-  const skip = () => tl.progress() < 0.98 && tl.timeScale(7)
-  for (const ev of ['keydown', 'pointerdown', 'wheel', 'touchstart']) window.addEventListener(ev, skip, { once: true, passive: true })
+  const tl = gsap.timeline()
+  // 0 to 0.5s: a dot flares in the spotlight, the dust rushes into the bomb, it flashes, the curtain lifts
+  tl.fromTo(dot, { scale: 0 }, { scale: 1.8, duration: 0.2, ease: 'back.out(3)' }, 0)
+  tl.to(dot, { scale: 0, autoAlpha: 0, duration: 0.15, ease: 'power3.in' }, 0.25)
+  tl.to(P, { intro: 1, duration: 0.55, ease: 'power3.out' }, 0.05)
+  tl.to(P, { heat: 1, duration: 0.25, ease: 'power2.in' }, 0.3)
+  tl.call(() => loader.classList.add('done'), null, 0.15)
+  tl.fromTo('.flash', { autoAlpha: 0 }, { autoAlpha: 0.6, duration: 0.06 }, 0.5)
+  tl.to('.flash', { autoAlpha: 0, duration: 0.6, ease: 'power2.out' }, 0.56)
+  tl.call(() => loader.remove(), null, 0.5)
+  // the name and copy arrive inside the same half second
+  tl.fromTo(wordInner, { yPercent: 105, rotateX: -85, autoAlpha: 0 }, { yPercent: 0, rotateX: 0, autoAlpha: 1, duration: 0.7, ease: 'expo.out', stagger: 0.03 }, 0.15)
+  tl.fromTo(['.nav', '.hero-a > *', '.hero-meta > *'], { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: 'power3.out', stagger: 0.05 }, 0.2)
+  // after 0.5s, in the background: the bomb blows and the pieces land as Alfred, the signature writes itself
+  tl.to(P, { form: 1, duration: 1.1, ease: 'power2.out' }, 0.5)
+  tl.to('.hero-sig', { clipPath: 'inset(-30% 0% -30% 0)', duration: 0.9, ease: 'power1.inOut' }, 0.6)
+  tl.call(() => decode($('.eyebrow'), { duration: 0.8 }), null, 0.4)
+  tl.call(wordHover, null, 0.9)
 }
 
 // ---------- scroll: the portrait trembles, bursts, and turns into the dust behind the site ----------
@@ -135,13 +120,13 @@ function heroScroll() {
     scrollTrigger: { trigger: '.hero', start: 'top top', end: phone ? '+=120%' : '+=160%', pin: '.hero-stage', scrub: 0.9, refreshPriority: 10 },
   })
   tl.to(P, { charge: 1, duration: 0.2, ease: 'power2.in' }, 0)
-  tl.to('.hero-a', { autoAlpha: 0, y: -30, filter: 'blur(6px)', duration: 0.15 }, 0.02)
+  tl.fromTo('.hero-a', { autoAlpha: 1, y: 0, filter: 'blur(0px)' }, { autoAlpha: 0, y: -30, filter: 'blur(6px)', duration: 0.15, immediateRender: false }, 0.02)
   // the letters get thrown apart by the blast
   wordChars.forEach((c, i) => {
     const side = (i - (wordChars.length - 1) / 2) / wordChars.length
-    tl.to(c, { yPercent: -60 - Math.random() * 120, xPercent: side * 160, rotate: side * 70 + (Math.random() - 0.5) * 40, autoAlpha: 0, filter: 'blur(10px)', duration: 0.35, ease: 'power2.out' }, 0.2 + Math.random() * 0.04)
+    tl.fromTo(c, { yPercent: 0, xPercent: 0, rotate: 0, rotateX: 0, autoAlpha: 1, filter: 'blur(0px)' }, { immediateRender: false, yPercent: -60 - Math.random() * 120, xPercent: side * 160, rotate: side * 70 + (Math.random() - 0.5) * 40, autoAlpha: 0, filter: 'blur(10px)', duration: 0.35, ease: 'power2.out' }, 0.2 + Math.random() * 0.04)
   })
-  tl.to(['.hero-meta', '.hero-sig'], { autoAlpha: 0, duration: 0.1 }, 0.18)
+  tl.fromTo(['.hero-meta', '.hero-sig', '.hero-rail'], { autoAlpha: 1 }, { autoAlpha: 0, duration: 0.1, immediateRender: false }, 0.18)
   tl.fromTo('.flash', { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.025 }, 0.195)
   tl.to('.flash', { autoAlpha: 0, duration: 0.12, ease: 'power2.out' }, 0.22)
   tl.fromTo('.shock', { scale: 0.3, autoAlpha: 0 }, { scale: 5, autoAlpha: 0.9, duration: 0.05 }, 0.2)
@@ -150,6 +135,8 @@ function heroScroll() {
   tl.to(P, { burst: 1, duration: 0.6, ease: 'power1.out' }, 0.2)
   tl.fromTo('.after span', { autoAlpha: 0, yPercent: 60, filter: 'blur(8px)' }, { autoAlpha: 1, yPercent: 0, filter: 'blur(0px)', stagger: 0.05, duration: 0.22, ease: 'power3.out' }, 0.3)
   tl.fromTo('.after-sub', { autoAlpha: 0, y: 20 }, { autoAlpha: 1, y: 0, duration: 0.2 }, 0.42)
+  // real code fills the middle, columns running up and down
+  tl.fromTo('.code-rain', { autoAlpha: 0, filter: 'blur(8px)', scale: 0.97 }, { autoAlpha: 1, filter: 'blur(0px)', scale: 1, duration: 0.25, ease: 'power2.out' }, 0.3)
   // the three numbers rise on the right and count up with the scroll
   $$('.after-stats li').forEach((li, i) => {
     const el = $('strong', li)
@@ -159,15 +146,12 @@ function heroScroll() {
     if (m) tl.fromTo(o, { v: 0 }, { v: +m[1], duration: 0.3, ease: 'power2.out', onUpdate: () => { el.textContent = Math.round(o.v) + m[2] } }, 0.34 + i * 0.07)
   })
   tl.to({}, { duration: 0.12 })
-  // this pin is made after the intro, so the pins further down must be re-measured below it
-  ScrollTrigger.sort()
-  ScrollTrigger.refresh()
 }
 
 // letters lift and thicken as the cursor passes over them
 function wordHover() {
   if (!finePointer) return
-  const setters = wordChars.map((c) => ({ y: gsap.quickTo(c, 'yPercent', { duration: 0.6, ease: 'power3' }), s: gsap.quickTo(c, 'scaleY', { duration: 0.6, ease: 'power3' }), c }))
+  const setters = wordInner.map((c) => ({ y: gsap.quickTo(c, 'yPercent', { duration: 0.6, ease: 'power3' }), s: gsap.quickTo(c, 'scaleY', { duration: 0.6, ease: 'power3' }), c }))
   const stage = $('.hero-stage')
   stage.addEventListener('pointermove', (e) => {
     if (P.burst > 0.05) return
@@ -324,6 +308,14 @@ if (!reduced) {
       ScrollTrigger.create({ trigger: card, start: 'top 75%', once: true, onEnter: () => drawCard(card) })
     })
   })
+
+  // ---------- code rain: each column scrolls forever, faster when you scroll ----------
+  const rain = $$('.cr-col pre').map((pre, i) => {
+    const t = gsap.fromTo(pre, { yPercent: 0 }, { yPercent: -50, duration: 50 + i * 12, ease: 'none', repeat: -1 })
+    if (pre.parentElement.classList.contains('up')) t.progress(0.5).reversed(true)
+    return t
+  })
+  lenis.on('scroll', (e) => rain.forEach((r) => gsap.to(r, { timeScale: 1 + Math.min(Math.abs(e.velocity) / 4, 8), duration: 0.3, overwrite: true })))
 
   // ---------- marquee: speeds up and flips direction with the scroll ----------
   const rows = $$('.mq-track').map((t, i) => gsap.to(t, { xPercent: -50, duration: 38 + i * 6, ease: 'none', repeat: -1 }))

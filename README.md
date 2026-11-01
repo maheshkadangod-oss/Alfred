@@ -19,6 +19,16 @@ or need Alfred's sign-off before launch.
   counters, ticker and timeline.
 - People who turn off motion in their phone settings get a still hero with no burst.
 
+## Search and AI answers (SEO, AEO, GEO)
+- `src/seo.js` writes the head tags and one JSON-LD graph: Person, WebSite, ProfilePage, ItemList of
+  products, FAQPage. It also writes `sitemap.xml`, `robots.txt` (AI crawlers allowed on purpose) and
+  `llms.txt` (a plain summary for AI assistants). All from `src/content.js`, so they match the page.
+- The page has one real H1 with his name and role; the big ALFIEMAX is decoration.
+- The FAQ section is visible on the page, which Google requires for FAQ markup.
+- `public/og-image.jpg` is the share image, drawn from the same dot portrait.
+- After the domain points here, submit `https://alfiemax.com/sitemap.xml` in Google Search Console
+  and Bing Webmaster Tools.
+
 ## Video
 See `VIDEO-PROMPTS.md`.
 

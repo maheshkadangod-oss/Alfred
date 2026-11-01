@@ -1,6 +1,7 @@
 // Builds the page HTML as plain strings at build time (see vite.config.js).
 // Crawlers get every word without running JavaScript.
-import { site, hero, stats, about, projects, experience, skills, contact } from './content.js'
+import { site, hero, stats, about, projects, experience, skills, contact, faq } from './content.js'
+import { snippets, highlight } from './code.js'
 
 const ext = 'target="_blank" rel="noopener"'
 const sections = [['about', 'About'], ['work', 'Work'], ['experience', 'Experience'], ['contact', 'Contact']]
@@ -55,6 +56,10 @@ function heroHtml() {
             <a href="#contact" class="btn magnetic">${hero.secondary}</a>
           </div>
         </div>
+        <div class="code-rain" aria-hidden="true">
+          ${[0, 1, 2].map((c) => { const pick = [snippets[c * 2], snippets[c * 2 + 1]].map(highlight).join('\n\n'); return `<div class="cr-col${c % 2 ? ' up' : ''}"><pre>${pick}\n\n${pick}\n\n</pre></div>` }).join('')}
+        </div>
+        <p class="hero-rail"><b></b>${hero.rail}<i></i>${site.handle}</p>
         <div class="hero-b">
           <p class="after" aria-hidden="true">${hero.after.map((l) => `<span>${l}</span>`).join('')}</p>
           <p class="after-sub" aria-hidden="true">${hero.afterSub}</p>
@@ -64,7 +69,8 @@ function heroHtml() {
         </ul>
         <div class="hero-foot">
           <p class="sig hero-sig" aria-hidden="true">${site.name}</p>
-          <h1 class="word chrome" aria-label="${site.fullName}, ${hero.word}">${chars(hero.word)}</h1>
+          <h1 class="sr-only">${site.fullName}, ${site.role} in ${site.city}</h1>
+          <p class="word chrome" aria-hidden="true">${chars(hero.word)}</p>
           <div class="hero-meta">
             <p class="role"><b>${hero.roleA}</b> <i>${hero.roleB}</i></p>
             <p class="where">${site.city}</p>
@@ -135,6 +141,14 @@ export function renderHome() {
           <p>${e.text}</p>
         </li>`).join('')}
       </ol>
+    </section>
+
+    <section class="block faq" id="faq" aria-labelledby="faq-title">
+      <p class="label">Questions</p>
+      <h2 class="split" id="faq-title">${words('Straight answers.')}</h2>
+      <div class="faq-list">
+        ${faq.map((f, i) => `<details class="qa"${i === 0 ? ' open' : ''}><summary><span class="q-num">${String(i + 1).padStart(2, '0')}</span><h3>${f.q}</h3><i aria-hidden="true"></i></summary><p>${f.a}</p></details>`).join('')}
+      </div>
     </section>
 
     <section class="contact" id="contact">
