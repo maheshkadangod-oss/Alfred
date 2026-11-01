@@ -55,10 +55,13 @@ function heroHtml() {
             <a href="#contact" class="btn magnetic">${hero.secondary}</a>
           </div>
         </div>
-        <div class="hero-b" aria-hidden="true">
-          <p class="after">${hero.after.map((l) => `<span>${l}</span>`).join('')}</p>
-          <p class="after-sub">${hero.afterSub}</p>
+        <div class="hero-b">
+          <p class="after" aria-hidden="true">${hero.after.map((l) => `<span>${l}</span>`).join('')}</p>
+          <p class="after-sub" aria-hidden="true">${hero.afterSub}</p>
         </div>
+        <ul class="after-stats" aria-label="In numbers">
+          ${stats.map((s) => `<li><strong data-to="${s.value}">${s.value}</strong><span>${s.label}</span></li>`).join('')}
+        </ul>
         <div class="hero-foot">
           <p class="sig hero-sig" aria-hidden="true">${site.name}</p>
           <h1 class="word chrome" aria-label="${site.fullName}, ${hero.word}">${chars(hero.word)}</h1>
@@ -76,14 +79,28 @@ export function renderHome() {
   const half = Math.ceil(marquee.length / 2)
   const row = (items) => `<div class="mq-row"><div class="mq-track">${[...items, ...items].map((s) => `<span>${s}</span><i>✦</i>`).join('')}</div></div>`
   return `${heroHtml()}
-    <section class="stats" aria-label="In numbers">
-      ${stats.map((s) => `<div class="stat reveal"><strong data-count="${s.value}">${s.value}</strong><span>${s.label}</span></div>`).join('')}
-    </section>
 
     <section class="block about" id="about">
-      <p class="label">About</p>
-      <h2 class="split">${words(about.title)}</h2>
-      <div class="about-body">${about.body.map((p) => `<p class="reveal">${p}</p>`).join('')}</div>
+      <div class="about-grid">
+        <div class="about-copy">
+          <p class="label">About</p>
+          <h2 class="split">${words(about.title)}</h2>
+          <div class="about-body">${about.body.map((p) => `<p class="read">${p}</p>`).join('')}</div>
+        </div>
+        <figure class="float-photo">
+          <div class="fp-card">
+            <img src="/img/alfred-desk.webp" alt="${site.fullName} working at his laptop by a window at night" width="591" height="1024" loading="lazy" />
+            <i class="fp-glare" aria-hidden="true"></i>
+          </div>
+          <figcaption class="fp-chip"><i></i>${about.photoCaption}</figcaption>
+          <span class="fp-tag">${about.photoTag}</span>
+        </figure>
+      </div>
+    </section>
+
+    <section class="marquee" aria-label="Tools I use">
+      ${row(marquee.slice(0, half))}
+      ${row(marquee.slice(half)).replace('mq-row', 'mq-row rev')}
     </section>
 
     <section class="work" id="work">
@@ -106,10 +123,6 @@ export function renderHome() {
       </div>
     </section>
 
-    <section class="marquee" aria-label="Tools I use">
-      ${row(marquee.slice(0, half))}
-      ${row(marquee.slice(half)).replace('mq-row', 'mq-row rev')}
-    </section>
 
     <section class="block experience" id="experience">
       <p class="label">Experience</p>
@@ -122,16 +135,13 @@ export function renderHome() {
           <p>${e.text}</p>
         </li>`).join('')}
       </ol>
-      <div class="skills">
-        ${skills.map((g) => `<div class="skill reveal"><h3>${g.group}</h3><ul>${g.items.map((s) => `<li>${s}</li>`).join('')}</ul></div>`).join('')}
-      </div>
     </section>
 
     <section class="contact" id="contact">
       <div class="contact-in">
         <p class="label">Contact</p>
         <h2 class="big">${contact.title.map((l) => `<span class="bl"><span>${l}</span></span>`).join('')}</h2>
-        <p class="contact-sub reveal">${contact.sub}</p>
+        <p class="contact-sub">${contact.sub}</p>
         <a class="mail magnetic" href="mailto:${site.email}">${site.email}<span aria-hidden="true">↗</span></a>
         <p class="sig contact-sig" aria-hidden="true">${site.name}</p>
       </div>

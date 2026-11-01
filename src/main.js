@@ -3,6 +3,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Lenis from 'lenis'
 import { createOrb } from './orb.js'
 import { hero } from './content.js'
+import { decode, splitWords } from './text.js'
 
 // Page HTML is pre-rendered at build time (src/render.js). This file only adds motion.
 gsap.registerPlugin(ScrollTrigger)
@@ -14,6 +15,11 @@ const desk = window.matchMedia('(min-width: 961px)')
 const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches
 const $ = (s, r = document) => r.querySelector(s)
 const $$ = (s, r = document) => [...r.querySelectorAll(s)]
+// letters in their own spans, but each word kept together so lines only break between words
+const splitWordsToChars = (el) => {
+  el.innerHTML = el.textContent.split(' ').map((w) => `<span style="display:inline-block;white-space:nowrap">${[...w].map((c) => `<span class="ch" style="display:inline-block">${c}</span>`).join('')}</span>`).join(' ')
+  return $$('.ch', el)
+}
 const splitChars = (el, text = el.textContent) => {
   el.innerHTML = [...text].map((c, i) => `<span class="ch" style="--i:${i}">${c === ' ' ? '&nbsp;' : c}</span>`).join('')
   return $$('.ch', el)
@@ -42,8 +48,8 @@ $$('.nav-links a').forEach((a) => { const s = document.createElement('span'); s.
 const P = { intro: 0, heat: 0, form: 0, charge: 0, burst: 0 }
 let orb = null
 if (!reduced) {
-  // ?face=li previews the LinkedIn headshot as the dot portrait
-  const faceUrl = new URLSearchParams(location.search).get('face') === 'li' ? '/portrait-li.bin' : '/portrait.bin'
+  // default is the LinkedIn headshot; ?face=night previews the night laptop photo
+  const faceUrl = new URLSearchParams(location.search).get('face') === 'night' ? '/portrait-night.bin' : '/portrait.bin'
   createOrb($('.orb'), { count: phone ? 5000 : 10000, faceUrl }).then((o) => {
     orb = o
     if (!orb) document.body.classList.add('no-orb')
@@ -105,6 +111,7 @@ function intro() {
   tl.fromTo(wordChars, { yPercent: 105, rotateX: -85, autoAlpha: 0 }, { yPercent: 0, rotateX: 0, autoAlpha: 1, duration: 1.3, ease: 'expo.out', stagger: 0.05 }, '<0.2')
   tl.fromTo(['.nav', '.hero-a', '.hero-meta'], { autoAlpha: 0, y: 20 }, { autoAlpha: 1, y: 0, duration: 1, ease: 'power3.out', stagger: 0.1 }, '<0.5')
   tl.fromTo('.hero-sig', { autoAlpha: 1, clipPath: 'inset(-30% 100% -30% 0)' }, { clipPath: 'inset(-30% 0% -30% 0)', duration: 1.4, ease: 'power1.inOut' }, '<0.3')
+  tl.call(() => decode($('.eyebrow'), { duration: 1.2 }), null, '<0.2')
   tl.call(() => {
     loader.remove()
     document.body.classList.remove('loading')
@@ -112,17 +119,20 @@ function intro() {
     heroScroll()
     wordHover()
   })
-  // any key or click skips straight to the end
-  const skip = () => tl.progress() < 0.98 && tl.timeScale(5)
-  window.addEventListener('keydown', skip, { once: true })
-  window.addEventListener('pointerdown', skip, { once: true })
+  // the whole intro is under 2 seconds on a first visit and about 1 second after that
+  let seen = false
+  try { seen = !!localStorage.getItem('ad-intro'); localStorage.setItem('ad-intro', '1') } catch {}
+  tl.timeScale(seen ? 8 : 4.5)
+  // scroll, swipe, click or any key fast-forwards it
+  const skip = () => tl.progress() < 0.98 && tl.timeScale(7)
+  for (const ev of ['keydown', 'pointerdown', 'wheel', 'touchstart']) window.addEventListener(ev, skip, { once: true, passive: true })
 }
 
 // ---------- scroll: the portrait trembles, bursts, and turns into the dust behind the site ----------
 function heroScroll() {
   const tl = gsap.timeline({
     defaults: { ease: 'none' },
-    scrollTrigger: { trigger: '.hero', start: 'top top', end: phone ? '+=120%' : '+=160%', pin: '.hero-stage', scrub: 0.9 },
+    scrollTrigger: { trigger: '.hero', start: 'top top', end: phone ? '+=120%' : '+=160%', pin: '.hero-stage', scrub: 0.9, refreshPriority: 10 },
   })
   tl.to(P, { charge: 1, duration: 0.2, ease: 'power2.in' }, 0)
   tl.to('.hero-a', { autoAlpha: 0, y: -30, filter: 'blur(6px)', duration: 0.15 }, 0.02)
@@ -138,9 +148,20 @@ function heroScroll() {
   tl.to('.shock', { scale: 10, autoAlpha: 0, duration: 0.2, ease: 'power2.out' }, 0.25)
   tl.to(P, { charge: 0, duration: 0.1 }, 0.25)
   tl.to(P, { burst: 1, duration: 0.6, ease: 'power1.out' }, 0.2)
-  tl.fromTo('.after span', { autoAlpha: 0, yPercent: 60, filter: 'blur(8px)' }, { autoAlpha: 1, yPercent: 0, filter: 'blur(0px)', stagger: 0.06, duration: 0.25, ease: 'power3.out' }, 0.48)
-  tl.fromTo('.after-sub', { autoAlpha: 0, y: 20 }, { autoAlpha: 1, y: 0, duration: 0.2 }, 0.6)
+  tl.fromTo('.after span', { autoAlpha: 0, yPercent: 60, filter: 'blur(8px)' }, { autoAlpha: 1, yPercent: 0, filter: 'blur(0px)', stagger: 0.05, duration: 0.22, ease: 'power3.out' }, 0.3)
+  tl.fromTo('.after-sub', { autoAlpha: 0, y: 20 }, { autoAlpha: 1, y: 0, duration: 0.2 }, 0.42)
+  // the three numbers rise on the right and count up with the scroll
+  $$('.after-stats li').forEach((li, i) => {
+    const el = $('strong', li)
+    const m = el.dataset.to.match(/^(\d+)(.*)$/)
+    const o = { v: 0 }
+    tl.fromTo(li, { autoAlpha: 0, x: 60, filter: 'blur(10px)' }, { autoAlpha: 1, x: 0, filter: 'blur(0px)', duration: 0.2, ease: 'power3.out' }, 0.34 + i * 0.07)
+    if (m) tl.fromTo(o, { v: 0 }, { v: +m[1], duration: 0.3, ease: 'power2.out', onUpdate: () => { el.textContent = Math.round(o.v) + m[2] } }, 0.34 + i * 0.07)
+  })
   tl.to({}, { duration: 0.12 })
+  // this pin is made after the intro, so the pins further down must be re-measured below it
+  ScrollTrigger.sort()
+  ScrollTrigger.refresh()
 }
 
 // letters lift and thicken as the cursor passes over them
@@ -192,8 +213,47 @@ if (!reduced) {
     gsap.from(h.querySelectorAll('.w > span'), { yPercent: 110, rotate: 4, duration: 1.1, ease: 'expo.out', stagger: 0.05, scrollTrigger: { trigger: h, start: 'top 85%' } })
   )
   $$('.reveal').forEach((el) =>
-    gsap.from(el, { autoAlpha: 0, y: 40, filter: 'blur(6px)', duration: 1.1, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 90%' } })
+    gsap.from(el, { clipPath: 'inset(0 0 100% 0)', y: 30, duration: 1.2, ease: 'expo.out', scrollTrigger: { trigger: el, start: 'top 90%' } })
   )
+
+  // ---------- floating photo ----------
+  const fp = $('.fp-card')
+  if (fp) {
+    gsap.to('.float-photo', { y: -16, rotate: 0.8, duration: 3.2, ease: 'sine.inOut', yoyo: true, repeat: -1 })
+    gsap.to('.fp-chip', { y: 10, duration: 2.6, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 0.4 })
+    gsap.fromTo('.float-photo', { yPercent: 14 }, { yPercent: -10, ease: 'none', scrollTrigger: { trigger: '.about', start: 'top bottom', end: 'bottom top', scrub: true } })
+    gsap.fromTo(fp, { clipPath: 'inset(100% 0 0 0 round 26px)', scale: 1.08 }, { clipPath: 'inset(0% 0 0 0 round 26px)', scale: 1, duration: 1.6, ease: 'expo.inOut', scrollTrigger: { trigger: '.float-photo', start: 'top 80%' } })
+    gsap.fromTo('.fp-tag', { clipPath: 'inset(-30% 100% -30% 0)' }, { clipPath: 'inset(-30% 0% -30% 0)', duration: 1.2, ease: 'power1.inOut', delay: 0.9, scrollTrigger: { trigger: '.float-photo', start: 'top 80%' } })
+    if (finePointer) {
+      const rx = gsap.quickTo(fp, 'rotateX', { duration: 0.8, ease: 'power3' }), ry = gsap.quickTo(fp, 'rotateY', { duration: 0.8, ease: 'power3' })
+      const wrap = $('.float-photo')
+      wrap.addEventListener('pointermove', (e) => {
+        const r = wrap.getBoundingClientRect()
+        const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height
+        ry((x - 0.5) * 16); rx((0.5 - y) * 12)
+        fp.style.setProperty('--gx', `${x * 100}%`); fp.style.setProperty('--gy', `${y * 100}%`)
+      })
+      wrap.addEventListener('pointerleave', () => { rx(0); ry(0) })
+    }
+  }
+
+  // ---------- writing effects ----------
+  // labels and small captions decode out of noise as they arrive
+  $$('.label').forEach((el) => ScrollTrigger.create({ trigger: el, start: 'top 92%', once: true, onEnter: () => decode(el) }))
+  // about: every word starts dim and lights up as you read down the page
+  $$('.read').forEach((p) => {
+    const w = splitWords(p)
+    gsap.fromTo(w, { opacity: 0.14, filter: 'blur(1.5px)' }, { opacity: 1, filter: 'blur(0px)', ease: 'none', stagger: 0.08, scrollTrigger: { trigger: p, start: 'top 82%', end: 'bottom 50%', scrub: true } })
+  })
+  // project names scramble when you point at the card
+  $$('.project').forEach((card) => card.addEventListener('pointerenter', () => decode($('h3', card), { duration: 0.6, spread: 0.5 })))
+  // company names: letters drop in one by one
+  $$('.job h3').forEach((h) => {
+    const c = splitWordsToChars(h)
+    gsap.from(c, { yPercent: 100, autoAlpha: 0, rotateX: -70, duration: 0.8, ease: 'expo.out', stagger: 0.025, scrollTrigger: { trigger: h, start: 'top 88%' } })
+  })
+  // contact: the outlined second line fills with colour as you scroll
+  gsap.fromTo('.bl:last-child > span', { backgroundPosition: '100% 0' }, { backgroundPosition: '0% 0', ease: 'none', scrollTrigger: { trigger: '.big', start: 'top 75%', end: 'bottom 35%', scrub: true } })
 
   // ---------- numbers count up (the real numbers are already in the HTML for crawlers) ----------
   $$('[data-count]').forEach((el) => {
@@ -208,6 +268,7 @@ if (!reduced) {
   const drawCard = (card) => {
     if (card.dataset.drawn) return
     card.dataset.drawn = 1
+    decode($('.p-tag', card))
     const wires = $$('.wire', card)
     wires.forEach((w) => { const l = w.getTotalLength(); w.style.strokeDasharray = l; w.style.strokeDashoffset = l })
     gsap.timeline()
@@ -277,6 +338,15 @@ if (!reduced) {
   // ---------- experience: the line fills and each job lights up as you reach it ----------
   gsap.to('.tl-fill', { scaleY: 1, ease: 'none', scrollTrigger: { trigger: '.timeline', start: 'top 60%', end: 'bottom 60%', scrub: true } })
   $$('.job').forEach((j) => ScrollTrigger.create({ trigger: j, start: 'top 62%', end: 'bottom 62%', onToggle: (st) => st.isActive && j.classList.add('on'), onLeaveBack: () => j.classList.remove('on') }))
+
+  $$('.job').forEach((j) => {
+    gsap.fromTo(j, { '--line': 0 }, { '--line': 1, duration: 1.4, ease: 'expo.inOut', scrollTrigger: { trigger: j, start: 'top 85%' } })
+    gsap.from(j.querySelectorAll('.when, .role-t, :scope > p'), { clipPath: 'inset(0 0 100% 0)', y: 24, duration: 1.1, ease: 'expo.out', stagger: 0.08, scrollTrigger: { trigger: j, start: 'top 85%' } })
+  })
+
+  // ---------- contact: the green block opens out from a card to full width ----------
+  gsap.fromTo('.contact', { clipPath: 'inset(6% 5% 0% 5% round 48px)' }, { clipPath: 'inset(0% 0% 0% 0% round 0px)', ease: 'none', scrollTrigger: { trigger: '.contact', start: 'top 95%', end: 'top 25%', scrub: true } })
+  gsap.fromTo('.contact-sub', { clipPath: 'inset(0 0 100% 0)', y: 20 }, { clipPath: 'inset(0 0 0% 0)', y: 0, duration: 1.1, ease: 'expo.out', scrollTrigger: { trigger: '.contact-sub', start: 'top 92%' } })
 
   // ---------- contact ----------
   gsap.from('.bl > span', { yPercent: 110, duration: 1.3, ease: 'expo.out', stagger: 0.1, scrollTrigger: { trigger: '.big', start: 'top 85%' } })

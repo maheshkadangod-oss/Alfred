@@ -229,7 +229,7 @@ export async function createOrb(canvas, { count = 10000, faceUrl = '/portrait.bi
     // bomb on the left, portrait on the right; on phones the portrait fills the top half
     gl.uniform1f(U.uBallScale, desk ? 0.8 : 0.5)
     gl.uniform2f(U.uBall, desk ? -0.52 : -0.55, desk ? 0.18 : 0.62)
-    const li = faceUrl.includes('-li')
+    const li = !faceUrl.includes('night')
     gl.uniform1f(U.uFaceScale, desk ? (li ? 0.74 : 0.86) : (li ? 0.4 : 0.48))
     gl.uniform2f(U.uFace, desk ? (li ? 0.4 : 0.22) : (li ? 0.0 : -0.12), desk ? (li ? 0.1 : 0.04) : (li ? 0.47 : 0.42))
     gl.drawArrays(gl.POINTS, 0, count)

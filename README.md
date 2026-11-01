@@ -13,8 +13,8 @@ or need Alfred's sign-off before launch.
 - `src/orb.js` is the particle system: 10,000 dots (5,000 on phones). On load they gather into a bomb,
   it blows, and the pieces land as Alfred's portrait. Scrolling bursts the portrait into dust that
   stays behind the whole site.
-- `public/portrait.bin` holds the dot positions, sampled from his photo with the background removed.
-  `public/portrait-li.bin` is the LinkedIn headshot version; preview it with `?face=li` on the URL.
+- `public/portrait.bin` holds the dot positions, sampled from his LinkedIn headshot with the background removed.
+  `public/portrait-night.bin` is the night laptop photo; preview it with `?face=night` on the URL.
 - `src/main.js` has the intro, the scroll burst, the sideways work gallery, cursor, magnetic buttons,
   counters, ticker and timeline.
 - People who turn off motion in their phone settings get a still hero with no burst.

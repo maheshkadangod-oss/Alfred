@@ -45,6 +45,8 @@ export const stats = [
 ]
 
 export const about = {
+  photoCaption: 'Lead Engineer at GoZip', // CONFIRM title, same as experience
+  photoTag: 'Kochi, after hours',
   title: 'Building products from zero to production for over a decade.',
   body: [
     "I've shipped production systems across fintech, logistics, restaurant tech, marketing analytics, CRM and edtech. Often as the founding or sole engineer on a small team where every decision sticks.",
