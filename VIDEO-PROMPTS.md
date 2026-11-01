@@ -16,6 +16,10 @@ So the video has one job: **look like the person who was inside the bomb.**
 
 ## Settings for every prompt
 
+The site is grey with one red accent, so every clip should come out close to black and white.
+The page also greys the video down, so a little colour is fine.
+
+
 - Tool: Veo 3 in Google AI Studio (or Kling 2.x / Runway Gen-4). Use **image to video** with the photo as the first frame.
 - Aspect ratio 9:16. Length 6 to 8 seconds. Sound off.
 - Paste the negative prompt below into the negative field if the tool has one.
@@ -30,8 +34,8 @@ Start frame: the night laptop photo.
 Cinematic portrait video. A South Indian software engineer in a plain black t-shirt sits at a laptop
 by a tall glass window at night, city lights soft and out of focus behind him. He types for a moment,
 then looks up into the lens with a calm, confident half smile and holds eye contact. Keyboard backlight
-glows softly on his hands. The camera is locked off with a very slow push in, almost still. Cool blue
-ambient light from the window, a warm small light on his face. Shallow depth of field, 50mm lens,
+glows softly on his hands. The camera is locked off with a very slow push in, almost still. Muted, almost black and white
+colour grade, soft grey tones, a small warm light on his face. Shallow depth of field, 50mm lens,
 natural skin texture, quiet and premium mood. Same person, same clothes, same face for the whole clip.
 The last frame should match the first frame closely so the clip can loop.
 ```
@@ -41,7 +45,7 @@ The last frame should match the first frame closely so the clip can loop.
 Start frame: same photo. If your tool has "end frame", put the photo there instead and leave the start empty.
 
 ```
-Thousands of tiny glowing blue and white light particles drift in from the darkness and gather into the
+Thousands of tiny silver and white light particles drift in from the darkness and gather into the
 shape of a man sitting at a laptop by a night window. The particles settle and become a real, sharp,
 photographic person: a South Indian engineer in a black t-shirt, who then looks up at the camera with a
 calm half smile. Deep black background at the start, the window and city lights fade in softly behind
@@ -53,10 +57,10 @@ If the face comes out wrong in B, stop. Use A. A wrong face on someone's own por
 ## Prompt C: studio cut-out (needs the plain-wall photo)
 
 ```
-Studio portrait video on a pure deep charcoal background (#08090b). A South Indian software engineer
-in a black t-shirt stands with arms crossed, lit by one soft key light from the left and a thin cool
-blue rim light from behind. He uncrosses his arms, turns his head slowly to the camera and gives a small
-nod. Camera fixed at chest height, 85mm lens, very slow push in. No props, no text. Calm and confident.
+Studio portrait video on a pure graphite grey background (#141414). A South Indian software engineer
+in a black t-shirt stands with arms crossed, lit by one soft key light from the left and a thin neutral
+white rim light from behind. He uncrosses his arms, turns his head slowly to the camera and gives a small
+nod. Camera fixed at chest height, 85mm lens, very slow push in. No props, no text. Desaturated grey colour grade. Calm and confident.
 ```
 
 C is the one that looks like the "SATHYADEV" reference you sent, where the person stands in front of the name.

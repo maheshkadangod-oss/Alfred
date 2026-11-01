@@ -27,7 +27,7 @@ export const hero = {
   sub: '11+ years building SaaS products from the first commit to production. Backend architecture, product, and cloud, usually as the founding or only engineer.',
   primary: 'See the work',
   secondary: 'Get in touch',
-  hint: 'Scroll to break it open',
+  hint: 'Scroll',
   // the line that appears after the burst. It is Alfred's own banner line.
   after: ['Complex systems.', 'Kept simple.'],
   afterSub: 'Everything you just watched fly apart was ten thousand moving parts. My job is making them feel like one.',

@@ -1,7 +1,7 @@
 # alfiemax.com
 
 Portfolio for Alfred Dominic, Solutions Architect and Full-Stack Engineer, Kochi.
-Vite, GSAP, Lenis, and raw WebGL for the hero. Same setup as the Evan Lee site.
+Vite, GSAP, Lenis, and raw WebGL for the hero. Graphite grey with one red accent, Hanken Grotesk throughout. Same setup as the Evan Lee site.
 
 ## Edit the words
 All copy lives in `src/content.js`. Lines marked `CONFIRM` disagree between the live site and LinkedIn,

@@ -43,10 +43,10 @@ void main(){
   float heat = clamp(uCharge * 1.2 - uBurst * 0.8, 0.0, 1.0);
   gl_PointSize = (1.0 + size * 2.4) * uPx * (1.0 + heat * 0.9 + uBurst * 0.6) * (6.0 / -z) * uScale;
 
-  vec3 ice = vec3(0.49, 0.77, 1.0);
-  vec3 deep = vec3(0.22, 0.42, 0.95);
-  vec3 hot = vec3(1.0, 0.97, 0.92);
-  vec3 ember = vec3(1.0, 0.62, 0.28);
+  vec3 ice = vec3(0.86, 0.85, 0.83);
+  vec3 deep = vec3(0.42, 0.41, 0.40);
+  vec3 hot = vec3(1.0, 1.0, 0.98);
+  vec3 ember = vec3(0.9, 0.25, 0.18);
   vec3 c = mix(deep, ice, size);
   c = mix(c, hot, heat * 0.85);
   if (kind > 0.94) c = mix(c, ember, smoothstep(0.02, 0.2, uBurst));   // one in twenty becomes a spark
