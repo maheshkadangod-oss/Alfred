@@ -3,6 +3,8 @@
 Portfolio for Alfred Dominic, Solutions Architect and Full-Stack Engineer, Kochi.
 Vite, GSAP, Lenis, and raw WebGL. Spiralvue green and graphite palette, Hanken Grotesk throughout. Same setup as the Evan Lee site.
 
+Start with `HANDOVER.md`.
+
 ## Edit the words
 All copy lives in `src/content.js`. Lines marked `CONFIRM` disagree between the live site and LinkedIn,
 or need Alfred's sign-off before launch.

@@ -1,7 +1,7 @@
-/* Signature font. Argine (RantauType) is personal-use only, so it is not in this repo.
-   Buy the commercial licence at rantaustudio.com, put the file at public/fonts/Argine.woff2
-   (or Argine.otf) and it takes over. Until then Mrs Saint Delafield, a free font, stands in. */
-@font-face { font-family: 'Argine'; src: url('/fonts/Argine.woff2') format('woff2'), url('/fonts/Argine.otf') format('opentype'); font-display: swap; }
+/* Signature font: Mrs Saint Delafield (free, OFL licence, fine for commercial use).
+   To switch to Argine (RantauType): buy the commercial licence at rantaustudio.com, put the file at
+   public/fonts/Argine.woff2, and remove the two comment marks around the line below. */
+/* @font-face { font-family: 'Argine'; src: url('/fonts/Argine.woff2') format('woff2'); font-display: swap; } */
 
 /* Palette: Spiralvue colour system (Reseda, Moss, Hunter green, Dark grey, Metallic, Black, White) */
 :root {
